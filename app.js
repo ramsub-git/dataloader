@@ -1,6 +1,7 @@
 var https = require('https');
-/*var db = require("./db.js");
-var DataAccess = new DataAccess();*/
+/*
+ * var db = require("./db.js"); var DataAccess = new DataAccess();
+ */
 var NaturalLanguageUnderstandingV1 = require('watson-developer-cloud/natural-language-understanding/v1.js');
 
 var natural_language_understanding = new NaturalLanguageUnderstandingV1({
@@ -11,21 +12,29 @@ var natural_language_understanding = new NaturalLanguageUnderstandingV1({
 
 var parameters = {
 		  "text" : "",
+		  "semantic_roles": {"entities":true,"keywords":true,"limit":50},
+		  "return_analyzed_text" : true,
 		  "features" : {
+			  "categories": {},
+			  
+			"concepts":{"limit":50},
 		    "entities" : {
-		      "emotion" : true,
-		      "sentiment" : true,
-		      "limit" : 2
+		            "sentiment": false,
+		            "limit": 250
 		    },
-		    "keywords" : {
-		      "emotion" : true,
-		      "sentiment" : true,
-		      "limit" : 2
-		    }
+		    "keywords": {
+		        "sentiment": false,
+		        "emotion": false,
+		        "limit": 250
+		      },
+		  "relations": {}
 		  }
 		}
 
-https.get("https://itunes.apple.com/us/rss/topgrossingapplications/limit=10/json", (res) => {
+
+/**/
+
+https.get("https://itunes.apple.com/us/rss/toppaidapplications/limit=10/genre=6007/json", (res) => {
 	// Do stuff with response
 	var resJson = "";
 	res.on('data', (d) => {
@@ -35,7 +44,7 @@ https.get("https://itunes.apple.com/us/rss/topgrossingapplications/limit=10/json
 	res.on('end', (e) => {
 		console.log(e);
 		var head = JSON.parse(resJson);
-		//		console.log(head.feed.entry[0].summary.label);
+		// console.log(head.feed.entry[0].summary.label);
 		var entries = head.feed.entry;
 		console.log("length: " + entries.length);
 
@@ -44,6 +53,7 @@ https.get("https://itunes.apple.com/us/rss/topgrossingapplications/limit=10/json
 			parameters.text = entries[k].summary.label;
 
 			natural_language_understanding.analyze(parameters, function(err, response) {
+				// console.log(parameters.text);
 				if (err)
 					console.log('error:', err);
 				else
@@ -51,9 +61,10 @@ https.get("https://itunes.apple.com/us/rss/topgrossingapplications/limit=10/json
 			});
 		}
 
-	/*entries.foreach(function(elt, i, array) {
-		console.log(elt.summary.label);
-	});*/
+	/*
+	 * entries.foreach(function(elt, i, array) { console.log(elt.summary.label);
+	 * });
+	 */
 	});
 
 })
